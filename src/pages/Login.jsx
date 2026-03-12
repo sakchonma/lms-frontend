@@ -20,25 +20,33 @@ const Login = () => {
         navigate('/learner/home');
       }
     } catch (error) {
-      alert('Login Failed: ' + (error.response?.data?.message || error.message));
+      alert('เข้าสู่ระบบล้มเหลว: ' + (error.response?.data?.message || 'อีเมลหรือรหัสผ่านไม่ถูกต้อง'));
     }
   };
 
   return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh' }}>
-      <form onSubmit={handleLogin} className="card" style={{ width: '350px' }}>
-        <h2 style={{ textAlign: 'center' }}>LMS Login</h2>
-        <div style={{ marginBottom: '15px' }}>
-          <label>Email</label>
-          <input type="email" style={{ width: '100%', padding: '8px', marginTop: '5px' }} 
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', background: '#f8fafc' }}>
+      <form onSubmit={handleLogin} className="card" style={{ width: '400px', padding: '40px' }}>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <h2 style={{ margin: '0 0 8px 0', color: 'var(--conicle-red)' }}>Conicle</h2>
+          <p style={{ margin: 0, color: 'var(--conicle-text-muted)', fontSize: '0.9rem' }}>เข้าสู่ระบบเพื่อจัดการการเรียนรู้</p>
+        </div>
+        
+        <div className="form-group">
+          <label className="form-label">อีเมล</label>
+          <input type="email" placeholder="ระบุอีเมลของคุณ" className="form-control" 
             value={email} onChange={(e) => setEmail(e.target.value)} required />
         </div>
-        <div style={{ marginBottom: '20px' }}>
-          <label>Password</label>
-          <input type="password" style={{ width: '100%', padding: '8px', marginTop: '5px' }} 
+        
+        <div className="form-group">
+          <label className="form-label">รหัสผ่าน</label>
+          <input type="password" placeholder="ระบุรหัสผ่าน" className="form-control" 
             value={password} onChange={(e) => setPassword(e.target.value)} required />
         </div>
-        <button type="submit" className="btn btn-primary" style={{ width: '100%' }}>Login</button>
+        
+        <button type="submit" className="btn btn-primary" style={{ width: '100%', marginTop: '16px', padding: '12px' }}>
+          เข้าสู่ระบบ
+        </button>
       </form>
     </div>
   );

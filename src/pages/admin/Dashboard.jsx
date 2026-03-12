@@ -19,19 +19,19 @@ const Dashboard = () => {
 
   return (
     <AdminLayout>
-      <h1>Admin Dashboard</h1>
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '20px', marginTop: '20px' }}>
-        <div className="card">
-          <h3>Total Users</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{stats.totalUsers}</p>
+      <h1 style={{ marginBottom: '32px' }}>แดชบอร์ด</h1>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px' }}>
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--conicle-text-muted)' }}>ผู้ใช้งานทั้งหมด</h3>
+          <p style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--conicle-red)', margin: 0 }}>{stats.totalUsers}</p>
         </div>
-        <div className="card">
-          <h3>Total Courses</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{stats.totalCourses}</p>
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--conicle-text-muted)' }}>คอร์สทั้งหมด</h3>
+          <p style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--conicle-red)', margin: 0 }}>{stats.totalCourses}</p>
         </div>
-        <div className="card">
-          <h3>Total Classes</h3>
-          <p style={{ fontSize: '2rem', fontWeight: 'bold', color: 'var(--primary)' }}>{stats.totalClasses}</p>
+        <div className="card" style={{ padding: '24px' }}>
+          <h3 style={{ margin: '0 0 12px 0', fontSize: '0.9rem', color: 'var(--conicle-text-muted)' }}>คลาสเรียนทั้งหมด</h3>
+          <p style={{ fontSize: '2.5rem', fontWeight: '800', color: 'var(--conicle-red)', margin: 0 }}>{stats.totalClasses}</p>
         </div>
       </div>
     </AdminLayout>

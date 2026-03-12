@@ -5,65 +5,106 @@ import { useNavigate } from 'react-router-dom';
 
 const Pathways = () => {
   const [pathways, setPathways] = useState([]);
+  const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
   const fetchPathways = async () => {
     try {
       const { data } = await API.get('/learner/pathways');
-      setPathways(data);
-    } catch (error) { console.error(error); }
+      setPathways(Array.isArray(data) ? data : []);
+    } catch (error) { 
+      console.error(error); 
+      setPathways([]);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  useEffect(() => { fetchPathways(); }, []);
+  useEffect(() => { 
+    fetchPathways(); 
+  }, []);
+
+  const PathwayCard = ({ path }) => (
+    <div 
+      key={path._id} 
+      className="card" 
+      style={{ 
+        cursor: 'pointer', 
+        borderTop: '4px solid var(--primary)',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+        transition: 'transform 0.3s ease',
+        height: '100%'
+      }} 
+      onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
+      onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+      onClick={() => navigate(`/learner/pathway/${path._id}`)}
+    >
+      <div style={{ position: 'relative', height: '160px' }}>
+        <img 
+          src={path.image || 'https://placehold.co/600x400/14151a/00ff88?text=PATHWAY'} 
+          alt={path.title} 
+          style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
+        />
+        <div style={{ position: 'absolute', bottom: '10px', left: '10px' }}>
+          <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{path.level || 'Expert'}</span>
+        </div>
+      </div>
+      <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <h3 style={{ margin: '0 0 12px 0', fontSize: '1.1rem', color: 'white', lineHeight: '1.4', fontWeight: '800' }}>{path.title}</h3>
+        <p style={{ 
+          fontSize: '0.85rem', 
+          color: 'var(--text-muted)', 
+          marginBottom: '20px', 
+          height: '4.8em', 
+          overflow: 'hidden', 
+          display: '-webkit-box', 
+          WebkitLineClamp: '3', 
+          WebkitBoxOrient: 'vertical',
+          lineHeight: '1.6'
+        }}>
+          {path.description}
+        </p>
+        <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
+          <div style={{ flex: 1, height: '2px', backgroundColor: 'rgba(255,255,255,0.1)' }}>
+            <div style={{ width: '0%', height: '100%', backgroundColor: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+          </div>
+          <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)' }}>EXPLORE PATHWAY →</span>
+        </div>
+      </div>
+    </div>
+  );
 
   return (
     <LearnerLayout>
-      <h1>My Learning Pathways</h1>
-      <p style={{ color: 'var(--secondary)' }}>Complete courses in sequence to unlock the next level.</p>
-      
-      {pathways.map(pathway => (
-        <div key={pathway._id} className="card" style={{ marginTop: '30px' }}>
-          <h2>{pathway.title}</h2>
-          <p>{pathway.description}</p>
-          
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginTop: '20px' }}>
-            {pathway.courses.map((item, index) => (
-              <div 
-                key={item.courseId._id} 
-                style={{ 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  padding: '15px', 
-                  borderRadius: '8px', 
-                  border: '1px solid #e2e8f0',
-                  backgroundColor: item.isLocked ? '#f1f5f9' : '#fff',
-                  opacity: item.isLocked ? 0.7 : 1
-                }}
-              >
-                <div style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: item.isCompleted ? '#10b981' : (item.isLocked ? '#94a3b8' : 'var(--primary)'), color: 'white', display: 'flex', justifyContent: 'center', alignItems: 'center', marginRight: '20px', fontWeight: 'bold' }}>
-                  {item.isCompleted ? '✓' : index + 1}
-                </div>
-                
-                <div style={{ flex: 1 }}>
-                  <h4 style={{ margin: 0 }}>{item.courseId.title}</h4>
-                  <small style={{ color: item.isCompleted ? '#10b981' : (item.isLocked ? '#ef4444' : '#64748b') }}>
-                    {item.isCompleted ? 'Completed' : (item.isLocked ? 'Prerequisite Required' : 'Available')}
-                  </small>
-                </div>
-
-                <button 
-                  disabled={item.isLocked}
-                  onClick={() => navigate(`/learner/course/${item.courseId._id}`)}
-                  className="btn"
-                  style={{ backgroundColor: item.isLocked ? '#cbd5e1' : 'var(--primary)', color: 'white' }}
-                >
-                  {item.isLocked ? '🔒 Locked' : (item.isCompleted ? 'Review' : 'Start Learning')}
-                </button>
-              </div>
-            ))}
-          </div>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', padding: '40px 20px' }}>
+        <div style={{ marginBottom: '48px' }}>
+          <h1 style={{ fontSize: '2.5rem', marginBottom: '12px', fontWeight: '900' }}>
+            MY <span style={{ color: 'var(--primary)' }}>PATHWAYS</span>
+          </h1>
+          <p style={{ color: 'var(--text-muted)', fontSize: '1.1rem' }}>
+            Your enrolled learning journeys and progress.
+          </p>
         </div>
-      ))}
+
+        {loading ? (
+          <div style={{ color: 'white' }}>Loading your pathways...</div>
+        ) : pathways.length > 0 ? (
+          <div style={{ 
+            display: 'grid', 
+            gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', 
+            gap: '32px' 
+          }}>
+            {pathways.map(path => <PathwayCard key={path._id} path={path} />)}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '80px 0', border: '1px dashed var(--border)', borderRadius: '16px' }}>
+            <p style={{ color: 'var(--text-muted)', marginBottom: '20px' }}>You haven't enrolled in any pathways yet.</p>
+            <button className="btn btn-primary" onClick={() => navigate('/learner/pathway-catalog')}>Browse Pathway Catalog</button>
+          </div>
+        )}
+      </div>
     </LearnerLayout>
   );
 };

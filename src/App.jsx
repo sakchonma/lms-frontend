@@ -13,6 +13,11 @@ import AdminClasses from './pages/admin/Classes';
 import AdminPathways from './pages/admin/Pathways';
 import LearnerCourseDetail from './pages/learner/CourseDetail';
 import LearnerPathways from './pages/learner/Pathways';
+import LearnerPathwayCatalog from './pages/learner/PathwayCatalog';
+import LearnerPathwayDetail from './pages/learner/PathwayDetail';
+import LearnerClassCatalog from './pages/learner/ClassCatalog';
+import LearnerClassDetail from './pages/learner/ClassDetail';
+import LearnerMyClasses from './pages/learner/MyClasses';
 
 function App() {
   return (
@@ -36,7 +41,12 @@ function App() {
           <Route path="catalog" element={<LearnerCatalog />} />
           <Route path="my-courses" element={<LearnerMyCourses />} />
           <Route path="course/:id" element={<LearnerCourseDetail />} />
+          <Route path="pathway/:id" element={<LearnerPathwayDetail />} />
           <Route path="pathways" element={<LearnerPathways />} />
+          <Route path="pathway-catalog" element={<LearnerPathwayCatalog />} />
+          <Route path="class-catalog" element={<LearnerClassCatalog />} />
+          <Route path="my-classes" element={<LearnerMyClasses />} />
+          <Route path="class/:id" element={<LearnerClassDetail />} />
         </Route>
 
         <Route path="/" element={<Navigate to="/login" />} />
