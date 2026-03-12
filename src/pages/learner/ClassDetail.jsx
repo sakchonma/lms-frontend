@@ -171,12 +171,14 @@ const ClassDetail = () => {
           <aside style={{ position: 'sticky', top: '120px' }}>
             <div className="card" style={{ padding: '32px', display: 'flex', flexDirection: 'column', border: '1px solid var(--border)' }}>
               
-              <div style={{ marginBottom: '32px', textAlign: 'center' }}>
-                <h2 style={{ fontSize: '2.2rem', color: '#3b82f6', margin: 0 }}>
-                  {price > 0 ? `฿${price.toLocaleString()}` : 'ฟรี'}
-                </h2>
-                <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ค่าธรรมเนียมการอบรม</span>
-              </div>
+              {!isEnrolled && (
+                <div style={{ marginBottom: '32px', textAlign: 'center' }}>
+                  <h2 style={{ fontSize: '2.2rem', color: '#3b82f6', margin: 0 }}>
+                    {price > 0 ? `฿${price.toLocaleString()}` : 'ฟรี'}
+                  </h2>
+                  <span style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>ค่าธรรมเนียมการอบรม</span>
+                </div>
+              )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', marginBottom: '32px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9rem' }}>

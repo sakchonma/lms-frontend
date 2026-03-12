@@ -1,0 +1,129 @@
+:root {
+  --bg: #050608;
+  --surface: #0f1115;
+  --primary: #00ff88;
+  --primary-glow: rgba(0, 255, 136, 0.4);
+  --accent: #ff00ff;
+  --accent-glow: rgba(255, 0, 255, 0.4);
+  --secondary: #1a1d23;
+  --text-main: #ffffff;
+  --text-muted: #8a8d91;
+  --border: rgba(255, 255, 255, 0.05);
+  --radius-sm: 2px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  
+  --success: #10b981;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+}
+
+/* Force white text for learner side */
+.learner-layout-root {
+  color: var(--text-main);
+  background-color: var(--bg);
+}
+
+.scanline {
+  position: relative;
+  background-image: 
+    radial-gradient(circle at 50% 50%, rgba(0, 255, 136, 0.03) 0%, transparent 50%),
+    linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+  background-size: 100% 100%, 40px 40px, 40px 40px;
+}
+
+.xp-bar-container {
+  width: 100%;
+  height: 6px;
+  background: #1a1d23;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.xp-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--primary), #00d4ff);
+  box-shadow: 0 0 10px var(--primary-glow);
+  transition: width 0.5s ease-out;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+  color: var(--text-main);
+}
+
+.card:hover {
+  transform: translateY(-8px);
+  border-color: var(--primary);
+  box-shadow: 0 20px 40px -20px var(--primary-glow);
+}
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  background-color: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 0 40px;
+  height: 80px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: var(--text-muted);
+  font-weight: 700;
+  padding: 10px 16px;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.nav-links a.active {
+  color: var(--primary);
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: var(--radius-sm);
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-size: 0.75rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: var(--primary);
+  color: #000; /* Contrast for readability on light green */
+}
+
+/* If the user really wants ALL black gone, we can change it to a very dark green/gray */
+.btn-primary {
+  color: #050608; 
+}
+
+.btn-outline {
+  background-color: transparent;
+  border: 1px solid var(--primary);
+  color: var(--primary);
+}
+
+.badge {
+  color: #fff !important; /* Ensure badges always have white text */
+}

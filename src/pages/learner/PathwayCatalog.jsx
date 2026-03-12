@@ -22,49 +22,72 @@ const PathwayCatalog = () => {
     fetchPathways();
   }, []);
 
-  if (loading) return <LearnerLayout><p>Loading pathways...</p></LearnerLayout>;
+  if (loading) return (
+    <LearnerLayout>
+      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'var(--primary)' }}>
+        <div style={{ fontSize: '1.5rem', fontWeight: '900', letterSpacing: '0.2em' }}>ACCESSING SKILL TREES...</div>
+      </div>
+    </LearnerLayout>
+  );
 
   return (
     <LearnerLayout>
-      <div style={{ marginBottom: '60px' }}>
-        <h1 style={{ fontSize: '2.5rem', textShadow: '0 0 20px rgba(0,255,136,0.1)' }}>PATHWAY <span style={{ color: 'var(--primary)' }}>CATALOG</span></h1>
-        <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>Curated roadmaps to take you from beginner to expert.</p>
-      </div>
-      
-      <div className="grid" style={{ marginTop: '40px', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
-        {pathways.length === 0 ? (
-          <p style={{ color: 'var(--text-muted)' }}>No pathways available at the moment.</p>
-        ) : (
-          pathways.map(path => (
-            <div 
-              key={path._id} 
-              className="card" 
-              style={{ 
-                cursor: 'pointer', 
-                display: 'flex', 
-                flexDirection: 'column',
-                borderTop: '4px solid var(--primary)'
-              }} 
-              onClick={() => navigate(`/learner/pathway/${path._id}`)}
-            >
-              <div style={{ padding: '24px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '16px' }}>
-                  <span className="badge badge-primary" style={{ fontSize: '0.6rem' }}>{path.level || 'Expert'}</span>
-                </div>
-                <h3 style={{ margin: '0 0 12px 0', fontSize: '1rem', color: 'white', lineHeight: '1.4' }}>{path.title}</h3>
-                <p style={{ margin: '0', fontSize: '0.8rem', color: 'var(--text-muted)', flex: 1, lineHeight: '1.6', display: '-webkit-box', WebkitLineClamp: '3', WebkitBoxOrient: 'vertical', overflow: 'hidden', marginBottom: '20px' }}>
-                  {path.description}
-                </p>
-                <div style={{ marginTop: 'auto', display: 'flex', alignItems: 'center', gap: '15px' }}>
-                  <div style={{ flex: 1, height: '2px', backgroundColor: 'var(--secondary)' }}>
-                    <div style={{ width: '0%', height: '100%', backgroundColor: 'var(--primary)', boxShadow: '0 0 10px var(--primary)' }}></div>
+      <div style={{ padding: '40px 20px' }} className="scanline">
+        <div style={{ marginBottom: '60px', borderLeft: '4px solid var(--primary)', paddingLeft: '25px' }}>
+          <h1 style={{ fontSize: '3rem', fontWeight: '900', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>
+            SKILL TREE <span style={{ color: 'var(--primary)', textShadow: '0 0 20px var(--primary-glow)' }}>REGISTRY</span>
+          </h1>
+          <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)', marginTop: '10px' }}>Select an epic quest line to master multiple neural protocols.</p>
+        </div>
+        
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', 
+          gap: '30px' 
+        }}>
+          {pathways.length === 0 ? (
+            <div className="card" style={{ gridColumn: '1 / -1', padding: '100px 40px', textAlign: 'center', background: 'rgba(15,17,21,0.4)', borderStyle: 'dashed' }}>
+              <p style={{ color: 'var(--text-muted)', fontSize: '1.2rem' }}>NO SKILL TREES DISCOVERED IN THIS SECTOR.</p>
+            </div>
+          ) : (
+            pathways.map(path => (
+              <div key={path._id} className="card" onClick={() => navigate(`/learner/pathway/${path._id}`)}>
+                <div style={{ position: 'relative', height: '200px', overflow: 'hidden' }}>
+                  <img 
+                    src={path.image || 'https://placehold.co/600x400/14151a/00ff88?text=QUEST'} 
+                    alt={path.title} 
+                    style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.8 }} 
+                  />
+                  <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--surface), transparent)' }}></div>
+                  <div style={{ position: 'absolute', top: '15px', right: '15px' }}>
+                    <span style={{ background: 'rgba(0,0,0,0.8)', border: '1px solid var(--primary)', color: 'var(--primary)', padding: '4px 10px', fontSize: '0.6rem', fontWeight: '900', borderRadius: '2px' }}>EPIC QUEST</span>
                   </div>
-                  <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)' }}>GO →</span>
+                </div>
+                <div style={{ padding: '25px' }}>
+                  <span style={{ fontSize: '0.6rem', color: 'var(--primary)', fontWeight: '900', textTransform: 'uppercase' }}>{path.category || 'GENERAL'}</span>
+                  <h4 style={{ margin: '10px 0 15px 0', fontSize: '1.1rem', height: '1.4rem', overflow: 'hidden', color: 'white', fontWeight: '800' }}>{path.title}</h4>
+                  <p style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '25px', height: '3.6rem', overflow: 'hidden', lineHeight: '1.2' }}>
+                    {path.description}
+                  </p>
+                  
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--border)', paddingTop: '20px' }}>
+                    <div style={{ display: 'flex', gap: '15px' }}>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ display: 'block', fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: '800' }}>REWARD</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '900', color: 'white' }}>+1500 XP</span>
+                      </div>
+                      <div style={{ textAlign: 'center' }}>
+                        <span style={{ display: 'block', fontSize: '0.55rem', color: 'var(--text-muted)', fontWeight: '800' }}>RANK</span>
+                        <span style={{ fontSize: '0.8rem', fontWeight: '900', color: 'white' }}>{path.level || 'BGN'}</span>
+                      </div>
+                    </div>
+                    <button className="btn btn-outline" style={{ padding: '8px 20px', fontSize: '0.6rem' }}>INITIALIZE →</button>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))
-        )}
+            ))
+          )}
+        </div>
       </div>
     </LearnerLayout>
   );

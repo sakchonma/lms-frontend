@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import './learner.css';
 
 const LearnerLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -12,13 +13,13 @@ const LearnerLayout = ({ children }) => {
 
   const navItems = [
     { path: '/learner/home', label: 'Home' },
-    { path: '/learner/my-classes', label: 'My Class' },
-    { path: '/learner/my-courses', label: 'My Learning' },
-    { path: '/learner/pathways', label: 'My Pathways' },
+    { path: '/learner/my-classes', label: 'My Classroom' },
+    { path: '/learner/my-courses', label: 'My Course' },
+    { path: '/learner/pathways', label: 'My Pathway' },
   ];
 
   return (
-    <div style={{ backgroundColor: 'var(--bg)', minHeight: '100vh' }}>
+    <div className="learner-layout-root" style={{ backgroundColor: 'var(--bg)', minHeight: '100vh', color: 'white' }}>
       <nav className="navbar">
         <div style={{ 
           fontWeight: '900', 
@@ -27,7 +28,7 @@ const LearnerLayout = ({ children }) => {
           letterSpacing: '-0.05em',
           textShadow: '0 0 15px var(--primary-glow)'
         }}>
-          CORE<span style={{ color: 'white' }}>LMS</span>
+          NEXUS<span style={{ color: 'white' }}>OS</span>
         </div>
         <div className="nav-links">
           {navItems.map((item) => (
@@ -50,7 +51,7 @@ const LearnerLayout = ({ children }) => {
               color: 'var(--danger)'
             }}
           >
-            Logout
+            DISCONNECT
           </button>
         </div>
       </nav>

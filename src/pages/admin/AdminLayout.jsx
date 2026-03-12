@@ -1,5 +1,6 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
+import './admin.css';
 
 const AdminLayout = ({ children }) => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const AdminLayout = ({ children }) => {
     { path: '/admin/courses', label: 'ระบบจัดการคอร์ส' },
     { path: '/admin/classes', label: 'ระบบจัดการโปรแกรมคลาสเรียน' },
     { path: '/admin/pathways', label: 'ระบบจัดการเส้นทางการเรียนรู้' },
+    { path: '/admin/rewards', label: 'จัดการของรางวัล (Gamification)' },
   ];
 
   return (

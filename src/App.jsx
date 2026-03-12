@@ -11,6 +11,7 @@ import LearnerMyCourses from './pages/learner/MyCourses';
 
 import AdminClasses from './pages/admin/Classes';
 import AdminPathways from './pages/admin/Pathways';
+import AdminRewards from './pages/admin/Rewards';
 import LearnerCourseDetail from './pages/learner/CourseDetail';
 import LearnerPathways from './pages/learner/Pathways';
 import LearnerPathwayCatalog from './pages/learner/PathwayCatalog';
@@ -33,6 +34,7 @@ function App() {
           <Route path="courses" element={<AdminCourses />} />
           <Route path="classes" element={<AdminClasses />} />
           <Route path="pathways" element={<AdminPathways />} />
+          <Route path="rewards" element={<AdminRewards />} />
         </Route>
 
         {/* Learner Routes */}

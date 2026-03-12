@@ -184,6 +184,12 @@ const PathwayDetail = () => {
 
           <aside style={{ position: 'sticky', top: '120px' }}>
             <div className="card" style={{ padding: '32px', backgroundColor: 'var(--surface)', border: '2px solid var(--primary-light)' }}>
+              {enrollmentStatus !== 'enrolled' && pathway.price > 0 && (
+                <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+                  <h2 style={{ fontSize: '2.2rem', color: 'var(--primary)', margin: 0 }}>฿{pathway.price.toLocaleString()}</h2>
+                  <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Enrollment Fee</span>
+                </div>
+              )}
               <h4 style={{ marginBottom: '16px' }}>Enrollment</h4>
               <p style={{ fontSize: '0.9rem', color: 'var(--text-muted)', marginBottom: '24px' }}>
                 Start your journey through this curated roadmap. All materials are included upon enrollment.

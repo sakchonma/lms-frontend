@@ -7,53 +7,64 @@ const Home = () => {
   const [allCourses, setAllCourses] = useState([]);
   const [allPathways, setAllPathways] = useState([]);
   const [allClasses, setAllClasses] = useState([]);
-  const [userData, setUserData] = useState({ 
-    myCourses: [], 
-    pendingCourses: [], 
-    level: 1, 
-    xp: 0, 
-    rank: 'ROOKIE',
-    points: 0 
-  });
+  const [userData, setUserData] = useState(null);
+  const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const navigate = useNavigate();
 
   const fetchData = async () => {
     try {
-      const [resAll, resMe, resPaths, resClasses] = await Promise.all([
+      const [resAll, resMe, resPaths, resClasses, resInv] = await Promise.all([
         API.get('/learner/catalog').catch(() => ({ data: [] })),
         API.get('/auth/me').catch(() => ({ data: {} })),
         API.get('/learner/all-pathways').catch(() => ({ data: [] })),
-        API.get('/learner/classes').catch(() => ({ data: [] }))
+        API.get('/learner/classes').catch(() => ({ data: [] })),
+        API.get('/learner/inventory').catch(() => ({ data: [] }))
       ]);
       setAllCourses(Array.isArray(resAll.data) ? resAll.data : []);
-      setUserData({
-        ...resMe.data,
-        level: resMe.data.level || 1,
-        xp: resMe.data.xp || 45, // Demo value
-        rank: resMe.data.rank || 'NOVICE',
-        points: resMe.data.points || 1250
-      });
+      setUserData(resMe.data);
       setAllPathways(resPaths.data || []);
       setAllClasses(resClasses.data || []);
+      setInventory(resInv.data || []);
     } catch (error) { console.error(error); }
     finally { setLoading(false); }
   };
 
   useEffect(() => { fetchData(); }, []);
 
+  const handleEquip = async (itemId) => {
+    try {
+      const res = await API.post('/learner/equip', { itemId });
+      setUserData(res.data.user);
+    } catch (error) {
+      alert('Error equipping item');
+    }
+  };
+
   const getCourseStatus = (courseId) => {
-    if (!courseId) return 'available';
+    if (!courseId || !userData) return 'available';
     const cIdStr = courseId.toString();
     if (userData.myCourses?.some(c => (c._id || (typeof c === 'string' ? c : c.courseId))?.toString() === cIdStr)) return 'enrolled';
     if (userData.pendingCourses?.some(c => (c._id || (typeof c === 'string' ? c : c.courseId))?.toString() === cIdStr)) return 'pending';
     return 'available';
   };
 
-  if (loading) return <LearnerLayout><div style={{padding:'40px', color: 'var(--primary)', textAlign: 'center'}}>INITIALIZING SYSTEM...</div></LearnerLayout>;
+  if (loading || !userData) return (
+    <LearnerLayout>
+      <div style={{ height: '80vh', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', color: 'var(--primary)' }}>
+        <div style={{ fontSize: '2rem', fontWeight: '900', letterSpacing: '0.2em', marginBottom: '10px' }}>SYSTEM BOOTING</div>
+        <div style={{ width: '300px' }} className="xp-bar-container">
+          <div className="xp-bar-fill" style={{ width: '60%' }}></div>
+        </div>
+      </div>
+    </LearnerLayout>
+  );
+
+  const currentAvatar = userData.equippedAvatar || userData.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky';
+  const currentFrame = userData.equippedFrame || '';
 
   const enrolledCourses = allCourses.filter(c => getCourseStatus(c._id) === 'enrolled');
-  const pendingCourses = allCourses.filter(c => getCourseStatus(c._id) === 'pending');
   const availableCourses = allCourses.filter(c => getCourseStatus(c._id) === 'available');
 
   const SectionHeader = ({ title, linkTo, emoji, color = 'var(--primary)' }) => (
@@ -81,55 +92,61 @@ const Home = () => {
 
   return (
     <LearnerLayout>
-      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }}>
+      <div style={{ maxWidth: '1400px', margin: '0 auto', padding: '20px' }} className="scanline">
         
-        {/* TOP STATUS BAR */}
-        <div className="card" style={{ 
-          padding: '20px 30px', 
-          marginBottom: '40px', 
-          display: 'flex', 
-          justifyContent: 'space-between', 
-          alignItems: 'center',
-          background: 'linear-gradient(90deg, #0f1115 0%, #1a1d23 100%)',
-          borderLeft: '4px solid var(--primary)'
+        {/* PLAYER HUD - Updated to 2 columns */}
+        <div style={{ 
+          display: 'grid', 
+          gridTemplateColumns: '1fr 2fr', 
+          gap: '20px', 
+          marginBottom: '40px' 
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <div style={{ position: 'relative' }}>
-              <img 
-                src={userData.image || 'https://api.dicebear.com/7.x/avataaars/svg?seed=Lucky'} 
-                alt="Avatar" 
-                style={{ width: '60px', height: '60px', borderRadius: '12px', border: '2px solid var(--primary)' }} 
-              />
-              <div style={{ position: 'absolute', bottom: '-10px', right: '-10px', background: 'var(--primary)', color: 'black', padding: '2px 8px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '900' }}>
-                LVL {userData.level}
+          <div className="card" onClick={() => setShowProfileModal(true)} style={{ padding: '20px', borderLeft: '4px solid var(--primary)', cursor: 'pointer' }}>
+            <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
+              <div style={{ position: 'relative', width: '60px', height: '60px' }}>
+                {currentFrame && <img src={currentFrame} alt="" style={{ position: 'absolute', inset: '-8px', width: '76px', height: '76px', zIndex: 2 }} />}
+                <img src={currentAvatar} alt="Avatar" style={{ width: '60px', height: '60px', borderRadius: '8px', objectFit: 'cover' }} />
+                <div style={{ position: 'absolute', bottom: '-8px', right: '-8px', background: 'var(--primary)', color: 'white', padding: '1px 6px', borderRadius: '4px', fontSize: '0.6rem', fontWeight: '900', zIndex: 3 }}>
+                  LVL {userData.level}
+                </div>
               </div>
-            </div>
-            <div>
-              <h3 style={{ margin: 0, fontSize: '1.1rem', fontWeight: '900', color: 'white' }}>{userData.firstName} {userData.lastName}</h3>
-              <p style={{ margin: '4px 0 8px 0', fontSize: '0.75rem', color: 'var(--primary)', fontWeight: '800', letterSpacing: '0.1em' }}>{userData.rank}</p>
-              <div style={{ width: '200px' }}>
-                <div className="xp-bar-container">
-                  <div className="xp-bar-fill" style={{ width: `${userData.xp}%` }}></div>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '0.6rem', color: 'var(--text-muted)' }}>
-                  <span>{userData.xp}/100 XP</span>
-                  <span>NEXT LVL</span>
-                </div>
+              <div>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: 'white' }}>{userData.firstName}</h3>
+                <p style={{ margin: '2px 0 0 0', fontSize: '0.7rem', color: 'var(--primary)', fontWeight: '800' }}>{userData.rank}</p>
               </div>
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: '40px' }}>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700' }}>TOTAL POINTS</p>
-              <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'var(--primary)' }}>{userData.points.toLocaleString()}</p>
+          <div className="card" style={{ padding: '20px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '0.7rem' }}>
+              <span style={{ fontWeight: '900', color: 'white' }}>ENERGY / XP</span>
+              <span style={{ color: 'var(--primary)' }}>{userData.xp % 1000}/1000 XP</span>
             </div>
-            <div style={{ textAlign: 'center' }}>
-              <p style={{ margin: 0, fontSize: '0.65rem', color: 'var(--text-muted)', fontWeight: '700' }}>ACHIEVEMENTS</p>
-              <p style={{ margin: 0, fontSize: '1.2rem', fontWeight: '900', color: 'white' }}>12/45</p>
+            <div className="xp-bar-container" style={{ height: '8px' }}>
+              <div className="xp-bar-fill" style={{ width: `${(userData.xp % 1000) / 10}%` }}></div>
             </div>
           </div>
         </div>
+
+        {/* PROFILE MODAL */}
+        {showProfileModal && (
+          <div className="modal-overlay" style={{ background: 'rgba(0,0,0,0.85)' }}>
+            <div className="card" style={{ maxWidth: '800px', width: '100%', padding: '30px', background: 'var(--surface)', border: '1px solid var(--primary)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '30px' }}>
+                <h2 style={{ fontSize: '1.2rem', color: 'var(--primary)' }}>EQUIPMENT ARSENAL</h2>
+                <button onClick={() => setShowProfileModal(false)} style={{ background: 'none', border: 'none', color: 'white', fontSize: '1.5rem', cursor: 'pointer' }}>&times;</button>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(100px, 1fr))', gap: '15px', maxHeight: '400px', overflowY: 'auto' }}>
+                {inventory.map(item => (
+                  <div key={item._id} className="card" onClick={() => handleEquip(item._id)} style={{ padding: '10px', textAlign: 'center', borderColor: (userData.equippedAvatar === item.image || userData.equippedFrame === item.image) ? 'var(--primary)' : 'var(--border)' }}>
+                    <img src={item.image} alt="" style={{ width: '60px', height: '60px', objectFit: 'contain' }} />
+                    <p style={{ margin: '5px 0 0 0', fontSize: '0.6rem', fontWeight: '800', color: 'white' }}>{item.name}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* HERO SECTION */}
         <div className="card" style={{ 
@@ -137,40 +154,37 @@ const Home = () => {
           marginBottom: '60px', 
           position: 'relative', 
           overflow: 'hidden',
-          background: 'url(https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070) center/cover',
+          backgroundImage: 'url(https://images.unsplash.com/photo-1614850523296-d8c1af93d400?q=80&w=2070)',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
           display: 'flex',
           alignItems: 'center',
           padding: '0 60px'
         }}>
           <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(90deg, rgba(5,6,8,0.9) 0%, transparent 100%)' }}></div>
           <div style={{ position: 'relative', maxWidth: '500px' }}>
-            <span style={{ background: 'var(--primary)', color: 'black', padding: '4px 12px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '900', marginBottom: '20px', display: 'inline-block' }}>NEW MISSION AVAILABLE</span>
-            <h1 style={{ fontSize: '3rem', fontWeight: '900', margin: '0 0 20px 0', lineHeight: '1', letterSpacing: '-0.02em' }}>THE <span style={{ color: 'var(--primary)' }}>BLOCKCHAIN</span> PROTOCOL</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: '1rem', marginBottom: '30px', lineHeight: '1.6' }}>Master the core architecture of decentralized systems. Level up your engineering skills today.</p>
-            <button className="btn btn-primary" style={{ padding: '12px 32px', fontSize: '0.9rem', fontWeight: '900' }} onClick={() => navigate('/learner/catalog')}>ENTER ARENA</button>
+            <span style={{ background: 'var(--primary)', color: 'white', padding: '4px 12px', borderRadius: '4px', fontSize: '0.7rem', fontWeight: '900', marginBottom: '20px', display: 'inline-block' }}>NEW PROTOCOL AVAILABLE</span>
+            <h1 style={{ fontSize: '3rem', fontWeight: '900', margin: '0 0 20px 0', lineHeight: '1', color: 'white' }}>THE <span style={{ color: 'var(--primary)' }}>NEURAL</span> NEXUS</h1>
+            <button className="btn btn-primary" onClick={() => navigate('/learner/catalog')}>INITIATE PROTOCOL</button>
           </div>
         </div>
 
         {/* CONTENT SECTIONS */}
         {allPathways.length > 0 && (
           <section>
-            <SectionHeader title="Elite Pathways" linkTo="/learner/pathway-catalog" emoji="⚡" />
+            <SectionHeader title="My Pathways" linkTo="/learner/pathway-catalog" emoji="⚡" />
             <ResponsiveGrid>
               {allPathways.slice(0, 4).map(path => (
-                <div key={path._id} className="card" style={{ overflow: 'hidden', display: 'flex', flexDirection: 'column' }} onClick={() => navigate(`/learner/pathway/${path._id}`)}>
-                  <div style={{ position: 'relative', height: '150px' }}>
-                    <img src={path.image || 'https://placehold.co/600x400/14151a/00ff88?text=QUEST'} style={{ width: '100%', height: '100%', objectFit: 'cover', opacity: 0.7 }} alt="" />
-                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--card-bg), transparent)' }}></div>
-                    <div style={{ position: 'absolute', bottom: '15px', left: '15px' }}>
-                      <span className="badge" style={{ background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(10px)', color: 'var(--primary)', border: '1px solid var(--primary)', fontSize: '0.6rem' }}>{path.level || 'EXPERT'}</span>
-                    </div>
+                <div key={path._id} className="card" onClick={() => navigate(`/learner/pathway/${path._id}`)}>
+                  <div style={{ height: '150px', position: 'relative' }}>
+                    <img src={path.image || 'https://placehold.co/600x400/14151a/00ff88?text=QUEST'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to top, var(--surface), transparent)' }}></div>
                   </div>
-                  <div style={{ padding: '20px', flex: 1, display: 'flex', flexDirection: 'column' }}>
-                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', fontWeight: '800' }}>{path.title}</h4>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', lineHeight: '1.5', margin: '0 0 20px 0', height: '2.25rem', overflow: 'hidden' }}>{path.description}</p>
-                    <div style={{ marginTop: 'auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--primary)' }}>+500 XP</span>
-                      <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'white' }}>START QUEST →</span>
+                  <div style={{ padding: '20px' }}>
+                    <h4 style={{ margin: '0 0 10px 0', fontSize: '1rem', fontWeight: '800', color: 'white' }}>{path.title}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.65rem', fontWeight: '800', color: 'var(--primary)' }}>+1500 XP</span>
+                      <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'white' }}>LAUNCH →</span>
                     </div>
                   </div>
                 </div>
@@ -181,18 +195,18 @@ const Home = () => {
 
         {allClasses.length > 0 && (
           <section>
-            <SectionHeader title="Live Arenas" linkTo="/learner/class-catalog" emoji="🏟️" color="#3b82f6" />
+            <SectionHeader title="My Classrooms" linkTo="/learner/class-catalog" emoji="🏟️" color="#3b82f6" />
             <ResponsiveGrid>
               {allClasses.slice(0, 4).map(cls => (
-                <div key={cls._id} className="card" style={{ overflow: 'hidden', borderLeft: '4px solid #3b82f6' }} onClick={() => navigate(`/learner/class/${cls._id}`)}>
-                  <div style={{ position: 'relative', height: '140px' }}>
+                <div key={cls._id} className="card" onClick={() => navigate(`/learner/class/${cls._id}`)}>
+                  <div style={{ height: '140px' }}>
                     <img src={cls.image || 'https://placehold.co/600x400/1e293b/3b82f6?text=ARENA'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                   </div>
                   <div style={{ padding: '16px' }}>
-                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: '800' }}>{cls.title}</h4>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem', color: 'var(--text-muted)' }}>
-                      <span>👤 {cls.instructor}</span>
-                      <span style={{ color: '#3b82f6', fontWeight: '900' }}>JOIN NOW</span>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>{cls.title}</h4>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.7rem' }}>
+                      <span style={{ color: 'var(--text-muted)' }}>👤 MASTER {cls.instructor}</span>
+                      <span style={{ color: '#3b82f6', fontWeight: '900' }}>ENTER</span>
                     </div>
                   </div>
                 </div>
@@ -201,19 +215,40 @@ const Home = () => {
           </section>
         )}
 
+        {/* ENROLLED MISSIONS */}
+        {enrolledCourses.length > 0 && (
+          <section>
+            <SectionHeader title="My Courses" linkTo="/learner/my-courses" emoji="🎯" color="var(--primary)" />
+            <ResponsiveGrid>
+              {enrolledCourses.slice(0, 4).map(course => (
+                <div key={course._id} className="card" onClick={() => navigate(`/learner/course/${course._id}`)}>
+                  <div style={{ height: '140px' }}>
+                    <img src={course.image || 'https://placehold.co/600x400/14151a/00ff88?text=SOLO'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
+                  </div>
+                  <div style={{ padding: '16px' }}>
+                    <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>{course.title}</h4>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--primary)', fontWeight: '900' }}>RESUME PROTOCOL →</span>
+                  </div>
+                </div>
+              ))}
+            </ResponsiveGrid>
+          </section>
+        )}
+
+        {/* AVAILABLE MISSIONS */}
         <section>
-          <SectionHeader title="Solo Quests" linkTo="/learner/catalog" emoji="🎮" />
+          <SectionHeader title="Available Protocols" linkTo="/learner/catalog" emoji="🎮" />
           <ResponsiveGrid>
-            {availableCourses.slice(0, 4).map(course => (
-              <div key={course._id} className="card" style={{ overflow: 'hidden' }} onClick={() => navigate(`/learner/course/${course._id}`)}>
-                <div style={{ position: 'relative', height: '160px' }}>
+            {availableCourses.slice(0, 8).map(course => (
+              <div key={course._id} className="card" onClick={() => navigate(`/learner/course/${course._id}`)}>
+                <div style={{ height: '160px' }}>
                   <img src={course.image || 'https://placehold.co/600x400/14151a/00ff88?text=SOLO'} style={{ width: '100%', height: '100%', objectFit: 'cover' }} alt="" />
                 </div>
                 <div style={{ padding: '16px' }}>
-                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: '800' }}>{course.title}</h4>
+                  <h4 style={{ margin: '0 0 8px 0', fontSize: '0.9rem', fontWeight: '800', color: 'white' }}>{course.title}</h4>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>{course.level}</span>
-                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)' }}>PLAY →</span>
+                    <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>RANK: {course.level}</span>
+                    <span style={{ fontSize: '0.7rem', fontWeight: '900', color: 'var(--primary)' }}>INITIALIZE →</span>
                   </div>
                 </div>
               </div>
